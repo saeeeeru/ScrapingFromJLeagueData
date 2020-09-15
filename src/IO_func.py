@@ -45,15 +45,15 @@ def get_goal_ranking_df(URL = "https://data.j-league.or.jp/SFTD08/search?selectF
         index=False,
     )
 
-def get_participate_df(driver, year, competition, team, data_dir):
+def get_participate_df(driver, team, data_dir, n_move):
     # 最初に戻るには2回押す
     wait = WebDriverWait(driver, 10)
-    for i in range(2):
+    for i in range(n_move-1):
         prev_btn = wait.until(EC.element_to_be_clickable((By.ID, 'prevBtnB')))
         prev_btn.click()
     
     df_list = list()
-    for i in range(3):
+    for i in range(n_move):
         time.sleep(10)
         table = BeautifulSoup(driver.page_source, "html.parser").find('table', id='search_result')
         # カラム
@@ -74,7 +74,7 @@ def get_participate_df(driver, year, competition, team, data_dir):
         df = pd.DataFrame(index=index_list, columns=c_list, data=v_array)
         df_list.append(df)
         
-        if i != 3:
+        if i != n_move-1:
             next_btn = wait.until(EC.element_to_be_clickable((By.ID, 'nextBtnB')))
             next_btn.click()
     
@@ -82,8 +82,30 @@ def get_participate_df(driver, year, competition, team, data_dir):
     df = pd.concat(df_list, axis=1)
     
     # ローカル保存
-    df.to_csv(os.path.join(data_dir, year, competition, f'{team}.csv'))
+    df.to_csv(os.path.join(data_dir, f'{team}.csv'))
 
+def scrape_each_team(driver, wait, data_dir, n_move):
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
+    # team_selector = Select(wait.until(EC.element_located_to_be_selected((By.NAME, "team_id"))))
+    time.sleep(10)
+    team_selector = Select(driver.find_element_by_name("team_id"))
+
+    team_list = [option.text for option in team_selector.options if option.text != '▼']
+    
+    for team in tqdm(team_list):
+        time.sleep(10)
+        team_selector = Select(driver.find_element_by_name("team_id"))
+        team_selector.select_by_visible_text(team)
+        
+        search_btn = wait.until(EC.element_to_be_clickable((By.ID, 'search')))
+        search_btn.click()
+
+        get_participate_df(driver, team, data_dir, n_move)
+
+        home_btn = wait.until(EC.element_to_be_clickable((By.ID, 'back')))
+        home_btn.click()
 
 def scrape_all(URL = 'https://data.j-league.or.jp/SFPR01/'):
     DRIVER_PATH = os.path.join(os.getcwd(), 'chromedriver')
@@ -109,7 +131,7 @@ def scrape_all(URL = 'https://data.j-league.or.jp/SFPR01/'):
 
     wait = WebDriverWait(driver, 30)
     
-    for year in year_list[3:-1]:
+    for year in year_list[4:-1]:
         time.sleep(10)
         year_selector = Select(driver.find_element_by_name("competition_year"))
         print(year)
@@ -121,30 +143,23 @@ def scrape_all(URL = 'https://data.j-league.or.jp/SFPR01/'):
 
         competition_list = [option.text for option in competition_selector.options if option.text != '▼' and option.text.endswith('リーグ')]
         
-        competition = competition_list[0]
+        competition = 'Ｊ２リーグ'
         competition_selector.select_by_visible_text(competition)
 
-        if not os.path.exists(os.path.join(data_dir, year, competition)):
-            os.makedirs(os.path.join(data_dir, year, competition))
-        
-        # team_selector = Select(wait.until(EC.element_located_to_be_selected((By.NAME, "team_id"))))
-        time.sleep(10)
-        team_selector = Select(driver.find_element_by_name("team_id"))
-
-        team_list = [option.text for option in team_selector.options if option.text != '▼']
-        
-        for team in tqdm(team_list):
+        if competition=='Ｊ１リーグ' and year in ['2015年', '2016年']:
             time.sleep(10)
-            team_selector = Select(driver.find_element_by_name("team_id"))
-            team_selector.select_by_visible_text(team)
-            
-            search_btn = wait.until(EC.element_to_be_clickable((By.ID, 'search')))
-            search_btn.click()
+            stage_selector = Select(driver.find_element_by_name('competition_id'))
+            stage_list = [option.text for option in stage_selector.options if option.text != '▼']
+            for stage in stage_list:
+                time.sleep(10)
+                stage_selector = Select(driver.find_element_by_name('competition_id'))
+                stage_selector.select_by_visible_text(stage)
+                data_dir_tmp = os.path.join(data_dir, year, competition, stage)
+                scrape_each_team(driver, wait, data_dir_tmp, n_move=2)
 
-            get_participate_df(driver, year, competition, team, data_dir)
-
-            home_btn = wait.until(EC.element_to_be_clickable((By.ID, 'back')))
-            home_btn.click()
+        else:
+            data_dir_tmp = os.path.join(data_dir, year, competition)
+            scrape_each_team(driver, wait, data_dir_tmp, n_move=3)
             
 
 def main():
