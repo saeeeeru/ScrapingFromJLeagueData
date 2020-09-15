@@ -1,0 +1,4 @@
+# ScrapingFromJLeagueData
+## table of contents
+1. 歴代得点ランキングのスクレイピングとEDA [J.League Data Site](https://data.j-league.or.jp/SFTD08/search?selectFlag=0&competition_frames=1&competition_year_from=&competition_year_to=&goals_from=20&goals_to=)
+2. 出場時間記録のスクレイピングとEDA [J.League Data Site](https://data.j-league.or.jp/SFPR01/back?competition_year_ex=2017&competition_frame_id_ex=1&competition_id_ex=428&team_id_ex=14&competition_year=2017&competition_frame_id=1&competition_id=428&team_id=14&selectedCompetitionName=%EF%BC%AA%EF%BC%91%E3%83%AA%E3%83%BC%E3%82%B0&selectedCompetitionSubName=&selectedCompetitionYear=2017%E5%B9%B4&selectedTeamName=%E6%9C%AD%E5%B9%8C&dataSize=1&pageStartNo=22)
