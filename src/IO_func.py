@@ -131,7 +131,7 @@ def scrape_all(URL = 'https://data.j-league.or.jp/SFPR01/'):
 
     wait = WebDriverWait(driver, 30)
     
-    for year in year_list[:-1]:
+    for year in year_list[3:-1]:
         time.sleep(10)
         year_selector = Select(driver.find_element_by_name("competition_year"))
         print(year)
@@ -143,7 +143,7 @@ def scrape_all(URL = 'https://data.j-league.or.jp/SFPR01/'):
 
         competition_list = [option.text for option in competition_selector.options if option.text != '▼' and option.text.endswith('リーグ')]
         
-        competition = 'Ｊ３リーグ'
+        competition = 'Ｊ２リーグ'
         competition_selector.select_by_visible_text(competition)
 
         if competition=='Ｊ１リーグ' and year in ['2015年', '2016年']:
@@ -159,7 +159,7 @@ def scrape_all(URL = 'https://data.j-league.or.jp/SFPR01/'):
 
         else:
             data_dir_tmp = os.path.join(data_dir, year, competition)
-            scrape_each_team(driver, wait, data_dir_tmp, n_move=3)
+            scrape_each_team(driver, wait, data_dir_tmp, n_move=4 if competition=='Ｊ２リーグ' else 3)
             
 
 def main():
