@@ -1,4 +1,9 @@
-beautifulsoup4                     4.8.0     
-numpy                              1.17.2    
-numpydoc                           0.9.1     
-pandas                             0.25.1    
+selenium==3.141.0
+beautifulsoup4==4.8.0
+numpy==1.17.2    
+numpydoc==0.9.1
+pandas==0.25.1
+Pillow=8.2.0
+mplsoccer==1.0.2
+highlight-text=0.2
+japanize-matplotlib==1.1.3
